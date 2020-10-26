@@ -17,6 +17,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/pingcap/tiup/pkg/repository"
 	"io"
 	"io/ioutil"
 	"net/http"
