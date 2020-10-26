@@ -470,6 +470,8 @@ func (p *Playground) handleCommand(cmd *Command, w io.Writer) error {
 		return p.handleScaleIn(w, cmd.PID)
 	case ScaleOutCommandType:
 		return p.handleScaleOut(w, cmd)
+	case RestartCommandType:
+		return p.handleRestart(w, cmd)
 	}
 
 	return nil
@@ -1065,6 +1067,103 @@ func (p *Playground) bootGrafana(ctx context.Context, env *environment.Environme
 	}
 
 	return grafana, nil
+}
+
+func (p *Playground) handleRestart(w io.Writer, cmd *Command) error {
+	opt := singleInstanceConfig()
+	ctx, cancel := context.WithCancel(context.Background())
+
+	defer cancel()
+	for _, inst := range p.startedInstances {
+		if inst.Pid() == cmd.PID {
+			err := p.restartProcess(w, cmd, inst, opt, ctx)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (p *Playground) restartProcess(
+	w io.Writer,
+	cmd *Command,
+	inst instance.Instance,
+	opt *bootOptions,
+	ctx context.Context,
+) error {
+
+	kill := func(pid int, wait func() error) {
+		timer := time.AfterFunc(forceKillAfterDuration, func() {
+			_ = syscall.Kill(pid, syscall.SIGKILL)
+		})
+
+		_ = wait()
+		timer.Stop()
+	}
+	var err error
+	kill(cmd.PID, inst.Wait)
+	componentID := inst.Component()
+	config := p.getConfig(componentID, opt)
+	inst, err = p.addInstance(componentID, config)
+	if err != nil {
+		return err
+	}
+	err = p.startInstance(ctx, inst)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "restart instance %s success", inst.Component())
+	return nil
+}
+
+func singleInstanceConfig() *bootOptions {
+	opt := &bootOptions{
+		tidb: instance.Config{
+			Num: 1,
+		},
+		tikv: instance.Config{
+			Num: 1,
+		},
+		pd: instance.Config{
+			Num: 1,
+		},
+		tiflash: instance.Config{
+			Num: 1,
+		},
+		ticdc: instance.Config{
+			Num: 1,
+		},
+		drainer: instance.Config{
+			Num: 1,
+		},
+		pump: instance.Config{
+			Num: 1,
+		},
+		host:    "127.0.0.1",
+		monitor: true,
+		version: "",
+	}
+	return opt
+}
+
+func (p *Playground) getConfig(componentID string, opt *bootOptions) instance.Config {
+	switch componentID {
+	case "drainer":
+		return opt.drainer
+	case "tidb":
+		return opt.tidb
+	case "tiflash":
+		return opt.tiflash
+	case "ticdc":
+		return opt.ticdc
+	case "pd":
+		return opt.pd
+	case "pump":
+		return opt.pump
+	default:
+		return opt.tikv
+	}
 }
 
 func logIfErr(err error) {

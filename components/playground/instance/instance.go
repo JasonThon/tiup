@@ -36,7 +36,6 @@ type instance struct {
 	StatusPort int // client port for PD
 	ConfigPath string
 	BinPath    string
-	Name       string
 }
 
 // Instance represent running component
