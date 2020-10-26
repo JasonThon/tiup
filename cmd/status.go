@@ -45,7 +45,7 @@ func newStatusCmd() *cobra.Command {
 
 func showStatus(env *environment.Environment) error {
 	var table [][]string
-	table = append(table, []string{"Name", "Component", "PID", "Status", "Created Time", "Directory", "Binary", "Args"})
+	table = append(table, []string{"Name", "Name", "PID", "Status", "Created Time", "Directory", "Binary", "Args"})
 	if dataDir := env.LocalPath(localdata.DataParentDir); utils.IsExist(dataDir) {
 		dirs, err := ioutil.ReadDir(dataDir)
 		if err != nil {

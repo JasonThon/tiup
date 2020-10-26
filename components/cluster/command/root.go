@@ -145,7 +145,7 @@ func init() {
 		newDeploy(),
 		newStartCmd(),
 		newStopCmd(),
-		newRestartCmd(),
+		newRestartClusterCmd(),
 		newScaleInCmd(),
 		newScaleOutCmd(),
 		newDestroyCmd(),
@@ -164,6 +164,7 @@ func init() {
 		newDisableCmd(),
 		newTestCmd(), // hidden command for test internally
 		newTelemetryCmd(),
+		newRestartInstanceCmd(),
 	)
 }
 

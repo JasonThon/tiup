@@ -35,6 +35,7 @@ const (
 	ScaleInCommandType  CommandType = "scale-in"
 	ScaleOutCommandType CommandType = "scale-out"
 	DisplayCommandType  CommandType = "display"
+	RestartCommandType	CommandType = "restart"
 )
 
 // Command send to Playground.

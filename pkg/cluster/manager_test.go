@@ -86,3 +86,7 @@ pd_servers:
 	err = validateNewTopo(&topo)
 	assert.NotNil(err)
 }
+
+func TestRestartInstances(t *testing.T) {
+
+}

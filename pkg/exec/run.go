@@ -80,7 +80,7 @@ func RunComponent(env *environment.Environment, tag, spec, binPath string, args 
 					(sig == syscall.SIGINT && strings.Contains(errs, "exit status 1")) {
 					continue
 				}
-				fmt.Printf("Component `%s` exit with error: %s\n", component, errs)
+				fmt.Printf("Name `%s` exit with error: %s\n", component, errs)
 				return
 			}
 		}
@@ -94,7 +94,7 @@ func RunComponent(env *environment.Environment, tag, spec, binPath string, args 
 	select {
 	case s := <-sc:
 		sig = s.(syscall.Signal)
-		fmt.Printf("Got signal %v (Component: %v ; PID: %v)\n", s, component, p.Pid)
+		fmt.Printf("Got signal %v (Name: %v ; PID: %v)\n", s, component, p.Pid)
 		if component == "tidb" {
 			return syscall.Kill(p.Pid, syscall.SIGKILL)
 		} else if sig != syscall.SIGINT {

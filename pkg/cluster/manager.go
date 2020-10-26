@@ -248,6 +248,40 @@ func (m *Manager) RestartCluster(clusterName string, options operator.Options) e
 	return nil
 }
 
+func (m *Manager) RestartInstances(clusterName string, instanceName []string, options operator.Options) error {
+	metadata, err := m.meta(clusterName)
+	if err != nil && !errors.Is(perrs.Cause(err), meta.ErrValidate) {
+		return perrs.AddStack(err)
+	}
+
+	topo := metadata.GetTopology()
+	base := metadata.GetBaseMeta()
+
+	if err != nil {
+		return err
+	}
+
+	t := task.NewBuilder().
+		SSHKeySet(
+			m.specManager.Path(clusterName, "ssh", "id_rsa"),
+			m.specManager.Path(clusterName, "ssh", "id_rsa.pub")).
+		ClusterSSH(topo, base.User, options.SSHTimeout, options.SSHType, topo.BaseTopo().GlobalOptions.SSHType).
+		Func("RestartInstances", func(ctx *task.Context) error {
+			return operator.RestartInstance(ctx, topo, options, instanceName)
+		}).
+		Build()
+
+	if err := t.Execute(task.NewContext()); err != nil {
+		if errorx.Cast(err) != nil {
+			// FIXME: Map possible task errors and give suggestions.
+			return err
+		}
+		return perrs.Trace(err)
+	}
+
+	return nil
+}
+
 // ListCluster list the clusters.
 func (m *Manager) ListCluster() error {
 	names, err := m.specManager.List()

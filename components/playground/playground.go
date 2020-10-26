@@ -939,6 +939,17 @@ func (p *Playground) terminate(sig syscall.Signal) {
 	}
 }
 
+func (p* Playground) checkInstanceStarter(pid int) (int, bool) {
+	index := 0
+	for _, inst := range p.startedInstances {
+		if inst.Pid() == pid {
+			return index, true
+		}
+		index = index + 1
+	}
+	return -1, false
+}
+
 func (p *Playground) renderSDFile() error {
 	// we not start monitor at all.
 	if p.monitor == nil {

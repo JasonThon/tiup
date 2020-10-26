@@ -551,7 +551,7 @@ func TestUpdateComponents(t *testing.T) {
 	assert.Equal(t, "foo201", local.Installed["foo"].Contents)
 
 	// Sad paths
-	// Component doesn't exists
+	// Name doesn't exists
 	err = repo.UpdateComponents([]ComponentSpec{{
 		ID: "bar",
 	}})
