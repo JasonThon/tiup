@@ -165,6 +165,8 @@ func init() {
 		newTestCmd(), // hidden command for test internally
 		newTelemetryCmd(),
 		newRestartInstanceCmd(),
+		newPartitionCmd(),
+		newRemovePartitionCmd(),
 	)
 }
 
