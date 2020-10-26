@@ -35,7 +35,8 @@ const (
 	ScaleInCommandType  CommandType = "scale-in"
 	ScaleOutCommandType CommandType = "scale-out"
 	DisplayCommandType  CommandType = "display"
-	RestartCommandType	CommandType = "restart"
+	RestartCommandType	CommandType = "handleRestart"
+	PartitionCommandType CommandType = "handlePartition"
 )
 
 // Command send to Playground.
@@ -233,4 +234,75 @@ func requestCommand(cmd Command, addr string) (r io.ReadCloser, err error) {
 	}
 
 	return resp.Body, nil
+}
+
+func newPartition() *cobra.Command {
+	cmd := &cobra.Command {
+		Use: "handlePartition a component instance",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return partition(args)
+		},
+	}
+	return cmd
+}
+
+func partition(args []string) error {
+	port, err := targetTag()
+	if err != nil {
+		return err
+	}
+	var cmds []Command
+	for _, arg := range args {
+		pid, _ := strconv.Atoi(arg)
+		c := Command {
+			CommandType: PartitionCommandType,
+			PID: 		pid,
+		}
+		cmds = append(cmds, c)
+	}
+	addr := "127.0.0.1" + strconv.Itoa(port)
+	return sendCommandsAndPrintResult(cmds, addr)
+}
+
+func newRestart() *cobra.Command {
+	cmd := &cobra.Command {
+		Use: "handleRestart instances",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return restart(args)
+		},
+	}
+	return cmd
+}
+
+func restart(args []string) error {
+	port, err := targetTag()
+	if err != nil {
+		return err
+	}
+	var cmds []Command
+
+	for _, arg := range args {
+		pid, _ := strconv.Atoi(arg)
+		c := Command {
+			CommandType: RestartCommandType,
+			PID: 		pid,
+		}
+		cmds = append(cmds, c)
+	}
+	addr := "127.0.0.1" + strconv.Itoa(port)
+	return sendCommandsAndPrintResult(cmds, addr)
+}
+
+func newUnPartition() *cobra.Command {
+	cmd := &cobra.Command {
+		Use: "remove partition on a component instance",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return unpartition(args)
+		},
+	}
+	return cmd
+}
+
+func unpartition(args []string) error {
+
 }

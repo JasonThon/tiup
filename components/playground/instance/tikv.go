@@ -49,11 +49,6 @@ func NewTiKVInstance(binPath string, dir, host, configPath string, id int, pds [
 	}
 }
 
-func NewTiKVInstanceWithName(binPath string, dir, host, configPath string, id int, pds []*PDInstance, name string) *TiKVInstance {
-	tikv := NewTiKVInstance(binPath, dir, host, configPath, id, pds)
-	tikv.instance.Name = name
-	return tikv
-}
 
 // Addr return the address of tikv.
 func (inst *TiKVInstance) Addr() string {
