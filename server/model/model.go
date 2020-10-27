@@ -51,7 +51,7 @@ func (m *model) UpdateComponentManifest(component string, manifest *ComponentMan
 	}
 	lastVersion := snap.Signed.Meta["/"+manifest.Signed.Filename()].Version
 	if manifest.Signed.Version != lastVersion+1 {
-		log.Debugf("Name version not expected, expect %d, got %d", lastVersion+1, manifest.Signed.Version)
+		log.Debugf("Component version not expected, expect %d, got %d", lastVersion+1, manifest.Signed.Version)
 		return ErrorConflict
 	}
 	return m.txn.WriteManifest(fmt.Sprintf("%d.%s.json", manifest.Signed.Version, component), manifest)
