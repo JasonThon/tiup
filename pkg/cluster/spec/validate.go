@@ -180,12 +180,12 @@ func CheckClusterDirConflict(clusterList map[string]Metadata, clusterName string
 				return errDeployDirConflict.New("Deploy directory conflicts to an existing cluster").WithProperty(cliutil.SuggestionFromTemplate(`
 The directory you specified in the topology file is:
   Directory: {{ColorKeyword}}{{.ThisDirKind}} {{.ThisDir}}{{ColorReset}}
-  Name: {{ColorKeyword}}{{.ThisComponent}} {{.ThisHost}}{{ColorReset}}
+  Component: {{ColorKeyword}}{{.ThisComponent}} {{.ThisHost}}{{ColorReset}}
 
 It conflicts to a directory in the existing cluster:
   Existing Cluster Name: {{ColorKeyword}}{{.ExistCluster}}{{ColorReset}}
   Existing Directory:    {{ColorKeyword}}{{.ExistDirKind}} {{.ExistDir}}{{ColorReset}}
-  Existing Name:    {{ColorKeyword}}{{.ExistComponent}} {{.ExistHost}}{{ColorReset}}
+  Existing Component:    {{ColorKeyword}}{{.ExistComponent}} {{.ExistHost}}{{ColorReset}}
 
 Please change to use another directory or another host.
 `, properties))
@@ -291,12 +291,12 @@ func CheckClusterPortConflict(clusterList map[string]Metadata, clusterName strin
 				return errDeployPortConflict.New("Deploy port conflicts to an existing cluster").WithProperty(cliutil.SuggestionFromTemplate(`
 The port you specified in the topology file is:
   Port:      {{ColorKeyword}}{{.ThisPort}}{{ColorReset}}
-  Name: {{ColorKeyword}}{{.ThisComponent}} {{.ThisHost}}{{ColorReset}}
+  Component: {{ColorKeyword}}{{.ThisComponent}} {{.ThisHost}}{{ColorReset}}
 
 It conflicts to a port in the existing cluster:
   Existing Cluster Name: {{ColorKeyword}}{{.ExistCluster}}{{ColorReset}}
   Existing Port:         {{ColorKeyword}}{{.ExistPort}}{{ColorReset}}
-  Existing Name:    {{ColorKeyword}}{{.ExistComponent}} {{.ExistHost}}{{ColorReset}}
+  Existing Component:    {{ColorKeyword}}{{.ExistComponent}} {{.ExistHost}}{{ColorReset}}
 
 Please change to use another port or another host.
 `, properties))

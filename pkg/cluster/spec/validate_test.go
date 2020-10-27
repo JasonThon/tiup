@@ -428,12 +428,12 @@ tidb_servers:
 	c.Assert(ok, IsTrue)
 	c.Assert(suggestion, Equals, `The port you specified in the topology file is:
   Port:      9100
-  Name: tidb 172.16.5.138
+  Component: tidb 172.16.5.138
 
 It conflicts to a port in the existing cluster:
   Existing Cluster Name: topo1
   Existing Port:         9100
-  Existing Name:    pd 172.16.5.138
+  Existing Component:    pd 172.16.5.138
 
 Please change to use another port or another host.`)
 
@@ -455,12 +455,12 @@ pump_servers:
 	c.Assert(ok, IsTrue)
 	c.Assert(suggestion, Equals, `The port you specified in the topology file is:
   Port:      2235
-  Name: pump 172.16.5.138
+  Component: pump 172.16.5.138
 
 It conflicts to a port in the existing cluster:
   Existing Cluster Name: topo2
   Existing Port:         2235
-  Existing Name:    pd 172.16.5.138
+  Existing Component:    pd 172.16.5.138
 
 Please change to use another port or another host.`)
 }
@@ -516,12 +516,12 @@ tidb_servers:
 	c.Assert(ok, IsTrue)
 	c.Assert(suggestion, Equals, `The directory you specified in the topology file is:
   Directory: monitor deploy directory /home/tidb/deploy/monitor-9100
-  Name: tidb 172.16.5.138
+  Component: tidb 172.16.5.138
 
 It conflicts to a directory in the existing cluster:
   Existing Cluster Name: topo1
   Existing Directory:    monitor deploy directory /home/tidb/deploy/monitor-9100
-  Existing Name:    pd 172.16.5.138
+  Existing Component:    pd 172.16.5.138
 
 Please change to use another directory or another host.`)
 
@@ -571,12 +571,12 @@ pump_servers:
 	c.Assert(ok, IsTrue)
 	c.Assert(suggestion, Equals, `The directory you specified in the topology file is:
   Directory: data directory /home/tidb/deploy/pd-2234
-  Name: pump 172.16.5.138
+  Component: pump 172.16.5.138
 
 It conflicts to a directory in the existing cluster:
   Existing Cluster Name: topo2
   Existing Directory:    deploy directory /home/tidb/deploy/pd-2234
-  Existing Name:    pd 172.16.5.138
+  Existing Component:    pd 172.16.5.138
 
 Please change to use another directory or another host.`)
 }

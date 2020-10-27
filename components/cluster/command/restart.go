@@ -17,7 +17,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newRestartClusterCmd() *cobra.Command {
+func newRestartCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "restart <cluster-name>",
 		Short: "Restart a TiDB cluster",

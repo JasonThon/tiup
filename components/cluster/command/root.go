@@ -145,7 +145,7 @@ func init() {
 		newDeploy(),
 		newStartCmd(),
 		newStopCmd(),
-		newRestartClusterCmd(),
+		newRestartCmd(),
 		newScaleInCmd(),
 		newScaleOutCmd(),
 		newDestroyCmd(),
