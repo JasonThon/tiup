@@ -126,3 +126,7 @@ func (inst *TiKVInstance) checkConfig() error {
 
 	return nil
 }
+
+func (inst *TiKVInstance) Port() int {
+	return inst.instance.Port
+}

@@ -60,7 +60,7 @@ func (inst *TiDBInstance) Start(ctx context.Context, version v0manifest.Version)
 		endpoints = append(endpoints, fmt.Sprintf("%s:%d", inst.Host, pd.StatusPort))
 	}
 	args := []string{
-		"-P", strconv.Itoa(inst.Port),
+		"-P", strconv.Itoa(inst.Port()),
 		"--store=tikv",
 		fmt.Sprintf("--host=%s", inst.Host),
 		fmt.Sprintf("--status=%d", inst.StatusPort),
@@ -96,4 +96,8 @@ func (inst *TiDBInstance) LogFile() string {
 // Addr return the listen address of TiDB
 func (inst *TiDBInstance) Addr() string {
 	return fmt.Sprintf("%s:%d", advertiseHost(inst.Host), inst.Port)
+}
+
+func (inst *TiDBInstance) Port() int {
+	return inst.instance.Port
 }

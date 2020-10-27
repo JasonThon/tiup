@@ -17,10 +17,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/pingcap/tiup/pkg/repository"
+	"go.etcd.io/etcd/pkg/proxy"
+	"go.uber.org/zap"
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -48,6 +50,10 @@ import (
 // The duration process need to quit gracefully, or we kill the process.
 const forceKillAfterDuration = time.Second * 10
 
+var (
+	logger *zap.Logger
+)
+
 // Playground represent the playground of a cluster.
 type Playground struct {
 	dataDir string
@@ -74,6 +80,7 @@ type Playground struct {
 	// before playground quit.
 	monitor *monitor
 	grafana *grafana
+	partitions	map[int]*Partition
 }
 
 // MonitorInfo represent the monitor
@@ -473,6 +480,8 @@ func (p *Playground) handleCommand(cmd *Command, w io.Writer) error {
 		return p.handleScaleOut(w, cmd)
 	case RestartCommandType:
 		return p.handleRestart(w, cmd)
+	case PartitionCommandType:
+		return p.handlePartition(w, cmd)
 	}
 
 	return nil
@@ -1165,6 +1174,37 @@ func (p *Playground) getConfig(componentID string, opt *bootOptions) instance.Co
 	default:
 		return opt.tikv
 	}
+}
+
+func (p *Playground) handlePartition(w io.Writer, cmd *Command) error {
+	pid := cmd.PID
+	addr := "0.0.0.0"
+	localhost := "127.0.0.1"
+	_, ok := p.partitions[pid]
+	if ok {
+		return nil
+	}
+
+	config := proxy.ServerConfig {
+		Logger: logger,
+		From: url.URL {
+			Scheme: "tcp",
+		},
+		To: url.URL {
+			Scheme: "tcp",
+		},
+	}
+	for _, inst := range p.startedInstances {
+		if inst.Pid() == pid {
+			config.From.Host = addr + strconv.Itoa(inst.Port())
+			config.To.Host = localhost + strconv.Itoa(inst.Port())
+			break
+		}
+	}
+	partition := NewPartition(config)
+	p.partitions[pid] = partition
+	partition.PauseAccept()
+	return nil
 }
 
 func logIfErr(err error) {

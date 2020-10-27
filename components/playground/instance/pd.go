@@ -124,3 +124,7 @@ func (inst *PDInstance) LogFile() string {
 func (inst *PDInstance) Addr() string {
 	return fmt.Sprintf("%s:%d", advertiseHost(inst.Host), inst.StatusPort)
 }
+
+func (inst *PDInstance) Port() int {
+	return inst.instance.Port
+}

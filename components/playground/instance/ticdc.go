@@ -45,7 +45,7 @@ func NewTiCDC(binPath string, dir, host, configPath string, id int, pds []*PDIns
 		},
 		pds: pds,
 	}
-	ticdc.StatusPort = ticdc.Port
+	ticdc.StatusPort = ticdc.Port()
 	return ticdc
 }
 
@@ -85,4 +85,8 @@ func (c *TiCDC) Component() string {
 // LogFile return the log file.
 func (c *TiCDC) LogFile() string {
 	return filepath.Join(c.Dir, "ticdc.log")
+}
+
+func (c *TiCDC) Port() int {
+	return c.instance.Port
 }

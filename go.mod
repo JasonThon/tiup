@@ -3,6 +3,7 @@ module github.com/pingcap/tiup
 go 1.13
 
 require (
+	bou.ke/monkey v1.0.2
 	github.com/AstroProfundis/sysinfo v0.0.0-20200423033635-f6f7687215fd
 	github.com/AstroProfundis/tabby v1.1.0-color
 	github.com/BurntSushi/toml v0.3.1
@@ -22,8 +23,10 @@ require (
 	github.com/fatih/color v1.9.0
 	github.com/gibson042/canonicaljson-go v1.0.3
 	github.com/gizak/termui/v3 v3.1.0
+	github.com/glycerine/goconvey v0.0.0-20190410193231-58a59202ab31
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gogo/protobuf v1.3.1
+	github.com/golang/mock v1.3.1
 	github.com/golang/protobuf v1.3.4
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/mux v1.7.4
@@ -49,6 +52,7 @@ require (
 	github.com/pingcap/go-ycsb v0.0.0-20200226103513-00ca633a87d8
 	github.com/pingcap/kvproto v0.0.0-20200810113304-6157337686b1
 	github.com/pingcap/tidb-insight v0.3.1
+	github.com/prashantv/gostub v1.0.0
 	github.com/prometheus/client_model v0.2.0
 	github.com/prometheus/prom2json v1.3.0
 	github.com/r3labs/diff v0.0.0-20200627101315-aecd9dd05dd2
