@@ -228,6 +228,7 @@ Examples:
 	rootCmd.AddCommand(newScaleIn())
 	rootCmd.AddCommand(newPartition())
 	rootCmd.AddCommand(newRestart())
+	rootCmd.AddCommand(newRemovePartition())
 
 	return rootCmd.Execute()
 }

@@ -322,17 +322,3 @@ func removePartition(args []string) error {
 	addr := "127.0.0.1" + strconv.Itoa(port)
 	return sendCommandsAndPrintResult(cmds, addr)
 }
-//
-//func newUnPartition() *cobra.Command {
-//	cmd := &cobra.Command {
-//		Use: "remove partition on a component instance",
-//		RunE: func(cmd *cobra.Command, args []string) error {
-//			return unpartition(args)
-//		},
-//	}
-//	return cmd
-//}
-//
-//func unpartition(args []string) error {
-//
-//}
