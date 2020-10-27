@@ -35,8 +35,9 @@ const (
 	ScaleInCommandType  CommandType = "scale-in"
 	ScaleOutCommandType CommandType = "scale-out"
 	DisplayCommandType  CommandType = "display"
-	RestartCommandType	CommandType = "handleRestart"
-	PartitionCommandType CommandType = "handlePartition"
+	RestartCommandType	CommandType = "restart"
+	PartitionCommandType CommandType = "partition"
+	RemovePartition		CommandType = "unpartition"
 )
 
 // Command send to Playground.
@@ -266,7 +267,7 @@ func partition(args []string) error {
 
 func newRestart() *cobra.Command {
 	cmd := &cobra.Command {
-		Use: "handleRestart instances",
+		Use: "restart instances",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return restart(args)
 		},
@@ -285,6 +286,35 @@ func restart(args []string) error {
 		pid, _ := strconv.Atoi(arg)
 		c := Command {
 			CommandType: RestartCommandType,
+			PID: 		pid,
+		}
+		cmds = append(cmds, c)
+	}
+	addr := "127.0.0.1" + strconv.Itoa(port)
+	return sendCommandsAndPrintResult(cmds, addr)
+}
+
+func newRemovePartition() *cobra.Command {
+	cmd := &cobra.Command {
+		Use: "remove partition for a instance",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return removePartition(args)
+		},
+	}
+	return cmd
+}
+
+func removePartition(args []string) error {
+	port, err := targetTag()
+	if err != nil {
+		return err
+	}
+	var cmds []Command
+
+	for _, arg := range args {
+		pid, _ := strconv.Atoi(arg)
+		c := Command {
+			CommandType: RemovePartition,
 			PID: 		pid,
 		}
 		cmds = append(cmds, c)

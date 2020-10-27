@@ -12,6 +12,16 @@ func NewPartition(cfg proxy.ServerConfig) *Partition {
 	}
 }
 
+// Drop all incoming and outgoing traffic
+func (p *Partition) PauseTx() {
+	p.server.PauseTx()
+}
+
+func (p *Partition) UnpauseTx() {
+	p.server.UnpauseTx()
+}
+
+// Stop accept new connection
 func (p *Partition) PauseAccept() {
 	p.server.PauseAccept()
 }

@@ -482,40 +482,6 @@ func RestartComponent(getter ExecutorGetter, instances []spec.Instance, timeout 
 	return nil
 }
 
-func RestartInstance(
-	getter ExecutorGetter,
-	cluster spec.Topology,
-	options Options,
-	names []string,
-	) error {
-	roleFilter := set.NewStringSet(options.Roles...)
-	components := cluster.ComponentsByStartOrder()
-	components = FilterComponent(components, roleFilter)
-	for _, comp := range components {
-		err := restartInstancesInComp(getter, names, comp, options)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func restartInstancesInComp(getter ExecutorGetter, names []string, comp spec.Component, options Options) error {
-	nodeFilter := set.NewStringSet(options.Nodes...)
-	for _, name := range names {
-		insts := FilterInstance(comp.Instances(), nodeFilter)
-		for _, inst := range insts {
-			if inst.InstanceName() == name {
-				err := restartInstance(getter, inst, options.OptTimeout)
-				if err != nil {
-					return err
-				}
-			}
-		}
-	}
-	return nil
-}
-
 func enableInstance(getter ExecutorGetter, ins spec.Instance, timeout uint64, isEnable bool) error {
 	e := getter.Get(ins.GetHost())
 	if isEnable {

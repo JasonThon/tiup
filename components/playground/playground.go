@@ -18,7 +18,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"go.etcd.io/etcd/pkg/proxy"
-	"go.uber.org/zap"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -50,9 +49,7 @@ import (
 // The duration process need to quit gracefully, or we kill the process.
 const forceKillAfterDuration = time.Second * 10
 
-var (
-	logger *zap.Logger
-)
+const localhost = "127.0.0.1"
 
 // Playground represent the playground of a cluster.
 type Playground struct {
@@ -482,6 +479,8 @@ func (p *Playground) handleCommand(cmd *Command, w io.Writer) error {
 		return p.handleRestart(w, cmd)
 	case PartitionCommandType:
 		return p.handlePartition(w, cmd)
+	case RemovePartition:
+		return p.handleRemovePartition(w, cmd)
 	}
 
 	return nil
@@ -1104,10 +1103,10 @@ func (p *Playground) restartProcess(
 ) error {
 
 	kill := func(pid int, wait func() error) {
+		delete(p.partitions, pid)
 		timer := time.AfterFunc(forceKillAfterDuration, func() {
 			_ = syscall.Kill(pid, syscall.SIGKILL)
 		})
-
 		_ = wait()
 		timer.Stop()
 	}
@@ -1178,15 +1177,17 @@ func (p *Playground) getConfig(componentID string, opt *bootOptions) instance.Co
 
 func (p *Playground) handlePartition(w io.Writer, cmd *Command) error {
 	pid := cmd.PID
-	addr := "0.0.0.0"
-	localhost := "127.0.0.1"
+	addr, err := utils.GetExternalIpAddr()
+	if err != nil {
+		return err
+	}
 	_, ok := p.partitions[pid]
 	if ok {
+		fmt.Fprintf(w, "Instance %s has been partitioned", strconv.Itoa(cmd.PID))
 		return nil
 	}
 
 	config := proxy.ServerConfig {
-		Logger: logger,
 		From: url.URL {
 			Scheme: "tcp",
 		},
@@ -1196,14 +1197,28 @@ func (p *Playground) handlePartition(w io.Writer, cmd *Command) error {
 	}
 	for _, inst := range p.startedInstances {
 		if inst.Pid() == pid {
-			config.From.Host = addr + strconv.Itoa(inst.Port())
-			config.To.Host = localhost + strconv.Itoa(inst.Port())
+			config.From.Host = addr.String() + ":" + strconv.Itoa(inst.Port())
+			config.To.Host = localhost + ":" + strconv.Itoa(inst.Port())
 			break
 		}
 	}
 	partition := NewPartition(config)
 	p.partitions[pid] = partition
-	partition.PauseAccept()
+	partition.PauseTx()
+	fmt.Fprintf(w, "Instance %s-%s has been partitioned", cmd.ComponentID, strconv.Itoa(cmd.PID))
+	return nil
+}
+
+func (p *Playground) handleRemovePartition(w io.Writer, cmd *Command) error {
+	pid := cmd.PID
+	partition, ok := p.partitions[pid]
+	if !ok {
+		fmt.Fprintf(w, "Instance %s-%s has no partition", cmd.ComponentID, strconv.Itoa(cmd.PID))
+		return nil
+	}
+	partition.UnpauseTx()
+	fmt.Fprintf(w, "Instance %s-%s has removed partition", cmd.ComponentID, strconv.Itoa(cmd.PID))
+	delete(p.partitions, pid)
 	return nil
 }
 

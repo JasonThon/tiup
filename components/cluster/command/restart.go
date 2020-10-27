@@ -42,25 +42,3 @@ func newRestartClusterCmd() *cobra.Command {
 
 	return cmd
 }
-
-func newRestartInstanceCmd() *cobra.Command {
-
-	cmd := &cobra.Command{
-		Use: "restart <cluster-name> <instance-names>",
-		Short: "Restart TiDB/TiKV/PD instances in a cluster",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) <= 1 {
-				return cmd.Help()
-			}
-			clusterName := args[0]
-			instanceNames := args[1:]
-			teleCommand = append(teleCommand, scrubClusterName(clusterName))
-
-			return manager.RestartInstances(clusterName, instanceNames, gOpt)
-		},
-	}
-	cmd.Flags().StringSliceVarP(&gOpt.Roles, "role", "R", nil, "Only restart specified roles")
-	cmd.Flags().StringSliceVarP(&gOpt.Nodes, "node", "N", nil, "Only restart specified nodes")
-
-	return cmd
-}

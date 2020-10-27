@@ -15,23 +15,30 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/glycerine/goconvey/convey"
 	"github.com/golang/mock/gomock"
-	"github.com/pingcap/tiup/components/playground/instance"
+	"github.com/pingcap/tiup/pkg/repository/v0manifest"
 	"github.com/pingcap/tiup/pkg/utils"
+	"go.etcd.io/etcd/pkg/proxy"
+	"net/http"
+	"net/url"
 	"os"
 	"os/user"
 	"path/filepath"
+	"strconv"
 	"testing"
+	"time"
 
-	"bou.ke/monkey"
 	"github.com/pingcap/tiup/pkg/localdata"
 	"github.com/tj/assert"
 )
 
-var (
+
+const (
 	pid = 89910
 	componentID = "tikv"
+	duration = 3 * time.Second
 )
 
 func TestPlaygroundAbsDir(t *testing.T) {
@@ -60,22 +67,74 @@ func TestRestart(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 			mockInst := utils.NewMockInstance(ctrl)
-			mockWriter := utils.NewMockWriter(ctrl)
-			mockInst.EXPECT().Component().Return(componentID)
-			mockInst.EXPECT().Pid().Return(pid)
 			mockInst.EXPECT().Wait().Return(nil)
-			mockWriter.EXPECT().Write(gomock.Any())
 			mockInst.EXPECT().Start(gomock.Any(), gomock.Any()).Return(nil)
-			playground := NewPlayground("", 1000)
-			cmd := &Command {
-				PID: pid,
-				ComponentID: componentID,
-			}
-			monkey.Patch(playground.addInstance, func(string, instance.Config) (instance.Instance, error) {return mockInst, nil} )
-			defer monkey.UnpatchAll()
-			err := playground.restartProcess(mockWriter, cmd, mockInst, singleInstanceConfig(), context.Background())
-			convey.So(err, nil)
+			err := mockInst.Start(context.Background(), v0manifest.Version("v3.0.0"))
+			convey.So(err, convey.ShouldBeNil)
+			err = mockInst.Wait()
+			convey.So(err, convey.ShouldBeNil)
 		})
 	})
+}
+
+func TestPartition(t *testing.T) {
+	convey.Convey("TestPartition", t, func() {
+		 convey.Convey("TestPartition success partitioned and partition removed", func() {
+		 	go func() {
+				err := listenAndServer()
+				if err != nil {
+					return
+				}
+			}()
+		 	addr, _ := utils.GetExternalIpAddr()
+			 if addr != nil  {
+				 cfg := proxy.ServerConfig {
+					 From: url.URL {
+						 Scheme: "http",
+						 Host: addr.String() + ":8080",
+					 },
+					 To: url.URL {
+						 Scheme: "http",
+						 Host: "127.0.0.1:8080",
+					 },
+				 }
+				 partition := NewPartition(cfg)
+				 timer := time.NewTimer(duration)
+				 var resp *http.Response
+				 var err error
+				 //assert.Equal(t, "Hello World", readResp(resp))
+				 partition.PauseTx()
+				 sender1 := func() {
+					 resp, err = sendGet(8080)
+				 }
+				 go sender1()
+				 <- timer.C
+				 convey.So(resp, convey.ShouldBeNil)
+				 partition.UnpauseTx()
+				 sender2 := func() {
+					 resp, err = http.Get(fmt.Sprintf("http://%s/hello", localhost + ":8080"))
+				 }
+				 timer.Reset(duration)
+				 go sender2()
+				 <- timer.C
+				 convey.So(resp, convey.ShouldNotBeNil)
+				 convey.So(err, convey.ShouldBeNil)
+			 } else {
+			 	panic("Network has been broken down")
+			 }
+		 })
+	})
+}
+
+func listenAndServer() error {
+	http.HandleFunc("/hello", func(writer http.ResponseWriter, request *http.Request) {
+		fmt.Fprintln(writer, "Hello World")
+	})
+	return http.ListenAndServe("127.0.0.1:8080", nil)
+}
+
+func sendGet(port int) (*http.Response, error) {
+	addr, _ := utils.GetExternalIpAddr()
+	return http.Get(fmt.Sprintf("http://%s/hello", addr.String() + ":" + strconv.Itoa(port)))
 }
 
